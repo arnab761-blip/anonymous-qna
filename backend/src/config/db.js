@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const seedInitialData = require('./seed');
 
 let isConnected = false;
 let mongodInstance = null;
+
+const getMongoMemoryServer = () => {
+  try {
+    return require('mongodb-memory-server').MongoMemoryServer;
+  } catch (err) {
+    return null;
+  }
+};
 
 /**
  * Connect to MongoDB Atlas, with an automatic fallback to an embedded
@@ -18,14 +25,20 @@ const connectDB = async () => {
   const isPlaceholder = !mongoUri || mongoUri.includes('<username>') || mongoUri.includes('<db_user>') || mongoUri.includes('cluster0.abcde.mongodb.net');
 
   if (isPlaceholder) {
-    console.log('\n[MongoDB] Atlas M0 URI placeholder detected.');
-    console.log('[MongoDB] Starting automatic embedded local MongoDB for instant zero-config preview...');
-    try {
-      mongodInstance = await MongoMemoryServer.create();
-      mongoUri = mongodInstance.getUri();
-      console.log(`[MongoDB] Embedded MongoDB running at: ${mongoUri}`);
-    } catch (err) {
-      console.error('[MongoDB] Failed to start embedded MongoDB:', err.message);
+    const MongoMemoryServer = getMongoMemoryServer();
+    if (MongoMemoryServer) {
+      console.log('\n[MongoDB] Atlas M0 URI placeholder detected.');
+      console.log('[MongoDB] Starting automatic embedded local MongoDB for instant zero-config preview...');
+      try {
+        mongodInstance = await MongoMemoryServer.create();
+        mongoUri = mongodInstance.getUri();
+        console.log(`[MongoDB] Embedded MongoDB running at: ${mongoUri}`);
+      } catch (err) {
+        console.error('[MongoDB] Failed to start embedded MongoDB:', err.message);
+        process.exit(1);
+      }
+    } else {
+      console.error('\n[MongoDB] Error: MONGODB_URI environment variable is missing or placeholder.');
       process.exit(1);
     }
   }
@@ -47,7 +60,8 @@ const connectDB = async () => {
   } catch (error) {
     console.error('[MongoDB] Connection error:', error.message);
     // If remote connection failed, try falling back to local memory server
-    if (!mongodInstance) {
+    const MongoMemoryServer = getMongoMemoryServer();
+    if (!mongodInstance && MongoMemoryServer) {
       console.log('[MongoDB] Falling back to embedded local MongoDB...');
       try {
         mongodInstance = await MongoMemoryServer.create();

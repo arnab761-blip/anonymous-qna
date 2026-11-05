@@ -12,7 +12,7 @@ const startServer = async () => {
 
   const server = http.createServer(app);
 
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`[Server] Anonymous Q&A backend running on port: ${PORT}`);
     console.log(`[Server] Environment: ${process.env.NODE_ENV || 'development'}`);
   });
