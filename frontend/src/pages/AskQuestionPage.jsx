@@ -99,9 +99,9 @@ export default function AskQuestionPage({ onBack, onQuestionCreated, onOpenDetai
           onClick={onBack}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
         >
-          <ArrowLeft size={20} color="#334155" />
+          <ArrowLeft size={20} color="var(--text-primary)" />
         </button>
-        <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>নতুন প্রশ্ন করুন</h2>
+        <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>নতুন প্রশ্ন করুন</h2>
       </div>
 
       {error && (

@@ -189,10 +189,10 @@ export default function QuestionDetailPage({ questionId, onBack }) {
   return (
     <div style={{ paddingBottom: '40px' }}>
       {/* Top Header */}
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--card-divider)', backgroundColor: 'var(--bg-header)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button
           onClick={onBack}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: '#334155', fontWeight: '600' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-primary)', fontWeight: '600' }}
         >
           <ArrowLeft size={18} /> ফিড
         </button>
@@ -206,7 +206,7 @@ export default function QuestionDetailPage({ questionId, onBack }) {
       </div>
 
       {/* Question Details View */}
-      <div style={{ padding: '16px' }}>
+      <div style={{ padding: '16px', backgroundColor: 'var(--card-bg)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
           <div>
             <span className="tag-subject">{question.subject}</span>
@@ -215,13 +215,13 @@ export default function QuestionDetailPage({ questionId, onBack }) {
           {question.isVerifiedByTeacher && <TeacherVerifiedBadge />}
         </div>
 
-        <h1 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: '12px 0', lineHeight: 1.4 }}>
+        <h1 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', margin: '12px 0', lineHeight: 1.4 }}>
           {question.text}
         </h1>
 
         {question.imageUrl && <FeedImage imageUrl={question.imageUrl} />}
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--card-divider)' }}>
           <span className="alias-badge">
             <User size={12} />
             {question.alias}
@@ -235,23 +235,23 @@ export default function QuestionDetailPage({ questionId, onBack }) {
       </div>
 
       {/* Answers Section */}
-      <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>
+      <div style={{ padding: '16px', borderTop: '1px solid var(--card-divider)', borderBottom: '1px solid var(--card-divider)' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
           উত্তরসমূহ ({answers.length})
         </h3>
 
         {answers.length === 0 ? (
-          <p style={{ fontSize: '13px', color: '#64748b' }}>এখনো কোনো উত্তর আসেনি। প্রথম উত্তরটি আপনিই দিন!</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>এখনো কোনো উত্তর আসেনি। প্রথম উত্তরটি আপনিই দিন!</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {answers.map((ans) => (
               <div
                 key={ans._id}
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--card-bg)',
                   padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0'
+                  borderRadius: '10px',
+                  border: 'var(--card-border)'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
@@ -260,14 +260,14 @@ export default function QuestionDetailPage({ questionId, onBack }) {
                   </span>
                   <button
                     onClick={() => setReportTarget({ type: 'answer', id: ans._id })}
-                    style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
                     title="রিপোর্ট করুন"
                   >
                     <AlertOctagon size={13} />
                   </button>
                 </div>
 
-                <p style={{ fontSize: '14px', color: '#334155', whiteSpace: 'pre-line' }}>{ans.text}</p>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>{ans.text}</p>
 
                 {ans.imageUrl && <FeedImage imageUrl={ans.imageUrl} />}
               </div>

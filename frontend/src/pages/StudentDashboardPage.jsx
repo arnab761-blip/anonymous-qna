@@ -113,8 +113,8 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
           <span>ফিড</span>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Sparkles size={16} color="#4f46e5" />
-          <span style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+          <Sparkles size={16} color="#6366f1" />
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
             শিক্ষার্থী ড্যাশবোর্ড
           </span>
         </div>
@@ -135,15 +135,15 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span className="profile-alias">{data.profile?.alias || user?.alias}</span>
-                <span className="profile-level-badge" style={{ backgroundColor: `${userLevel.color}15`, color: userLevel.color, borderColor: `${userLevel.color}40` }}>
+                <span className="profile-level-badge" style={{ backgroundColor: `${userLevel.color}25`, color: userLevel.color, borderColor: `${userLevel.color}50` }}>
                   {userLevel.badge} {userLevel.title}
                 </span>
               </div>
-              <p style={{ fontSize: '13px', color: '#475569', marginTop: '4px', fontWeight: '500' }}>
-                {data.profile?.name} • <span style={{ color: '#64748b' }}>{data.profile?.identifier}</span>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', fontWeight: '500' }}>
+                {data.profile?.name} • <span style={{ color: 'var(--text-muted)' }}>{data.profile?.identifier}</span>
               </p>
               {data.profile?.joinedAt && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   <Calendar size={12} />
                   <span>যুক্ত হয়েছেন: {new Date(data.profile.joinedAt).toLocaleDateString('bn-BD', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                 </div>
@@ -238,12 +238,12 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
               {data.questions.length === 0 ? (
                 <div className="dashboard-empty-state">
                   <div className="empty-icon-box">
-                    <HelpCircle size={32} color="#94a3b8" />
+                    <HelpCircle size={32} color="var(--text-muted)" />
                   </div>
-                  <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
                     আপনি এখনও কোনো প্রশ্ন করেননি
                   </h4>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
                     যেকোনো বিষয়ে কনফিউশন থাকলে নির্ভয়ে প্রথম প্রশ্নটি এখনই পোস্ট করুন!
                   </p>
                   <button className="btn-primary" onClick={onNavigateAsk} style={{ margin: '0 auto' }}>
@@ -276,12 +276,12 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
               {data.answers.length === 0 ? (
                 <div className="dashboard-empty-state">
                   <div className="empty-icon-box">
-                    <MessageSquare size={32} color="#94a3b8" />
+                    <MessageSquare size={32} color="var(--text-muted)" />
                   </div>
-                  <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
                     আপনি এখনও কোনো উত্তর দেননি
                   </h4>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
                     ফিডে গিয়ে সহপাঠীদের প্রশ্নের সমাধান দিয়ে সাহায্য করুন এবং পয়েন্ট অর্জন করুন!
                   </p>
                   <button className="btn-secondary" onClick={onBack} style={{ margin: '0 auto' }}>
@@ -302,22 +302,22 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
                           <span className="tag-subject" style={{ fontSize: '11px', padding: '1px 6px' }}>
                             {ans.questionId.subject}
                           </span>
-                          <span style={{ fontSize: '12px', fontWeight: '600', color: '#1e40af', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {ans.questionId.text}
                           </span>
-                          <ExternalLink size={13} color="#94a3b8" />
+                          <ExternalLink size={13} color="var(--text-muted)" />
                         </div>
                       )}
 
                       <div style={{ marginTop: '8px' }}>
-                        <p style={{ fontSize: '14px', color: '#334155', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
                           {ans.text}
                         </p>
                         {ans.imageUrl && <FeedImage imageUrl={ans.imageUrl} />}
                       </div>
 
                       <div className="my-answer-footer">
-                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                           {new Date(ans.createdAt).toLocaleDateString('bn-BD', {
                             month: 'short',
                             day: 'numeric',
@@ -325,7 +325,7 @@ export default function StudentDashboardPage({ onBack, onOpenDetail, onNavigateA
                             minute: '2-digit'
                           })}
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#2563eb', fontSize: '12px', fontWeight: '600' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6366f1', fontSize: '12px', fontWeight: '600' }}>
                           <ThumbsUp size={13} />
                           <span>{ans.likeCount || 0} টি সহায়ক ভোট</span>
                         </div>
