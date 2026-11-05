@@ -30,58 +30,86 @@ const getQuestionsFeed = async (req, res, next) => {
     const cacheKey = `feed_${subject || 'all'}_${chapter || 'all'}_${cursor || 'first'}`;
     const cachedData = feedCache.get(cacheKey);
 
+    let baseQuestions;
+    let nextCursor;
+    let hasMore;
+    let isCached = false;
+
     if (cachedData) {
-      return res.status(200).json({
-        success: true,
-        cached: true,
-        ...cachedData
-      });
-    }
+      baseQuestions = cachedData.questions;
+      nextCursor = cachedData.nextCursor;
+      hasMore = cachedData.hasMore;
+      isCached = true;
+    } else {
+      const filter = {};
 
-    const filter = {};
-
-    if (subject && typeof subject === 'string') {
-      filter.subject = subject.trim();
-    }
-
-    if (chapter && typeof chapter === 'string') {
-      filter.chapter = chapter.trim();
-    }
-
-    // Cursor pagination using indexed _id: { $lt: cursor }
-    if (cursor) {
-      if (!mongoose.Types.ObjectId.isValid(cursor)) {
-        return res.status(400).json({
-          success: false,
-          message: 'অবৈধ পেজিনেশন কার্সার।'
-        });
+      if (subject && typeof subject === 'string') {
+        filter.subject = subject.trim();
       }
-      filter._id = { $lt: new mongoose.Types.ObjectId(cursor) };
+
+      if (chapter && typeof chapter === 'string') {
+        filter.chapter = chapter.trim();
+      }
+
+      // Cursor pagination using indexed _id: { $lt: cursor }
+      if (cursor) {
+        if (!mongoose.Types.ObjectId.isValid(cursor)) {
+          return res.status(400).json({
+            success: false,
+            message: 'অবৈধ পেজিনেশন কার্সার।'
+          });
+        }
+        filter._id = { $lt: new mongoose.Types.ObjectId(cursor) };
+      }
+
+      // Query exactly FEED_LIMIT items sorted by _id descending
+      baseQuestions = await Question.find(filter)
+        .select(FEED_PROJECTION)
+        .sort({ _id: -1 })
+        .limit(FEED_LIMIT)
+        .lean();
+
+      hasMore = baseQuestions.length === FEED_LIMIT;
+      nextCursor = hasMore ? baseQuestions[baseQuestions.length - 1]._id : null;
+
+      // Store in-memory cache for 15 seconds (raw feed items without user-specific like state)
+      feedCache.set(
+        cacheKey,
+        {
+          questions: baseQuestions,
+          nextCursor,
+          hasMore
+        },
+        15
+      );
     }
 
-    // Query exactly FEED_LIMIT items sorted by _id descending
-    const questions = await Question.find(filter)
-      .select(FEED_PROJECTION)
-      .sort({ _id: -1 })
-      .limit(FEED_LIMIT)
-      .lean();
+    // Check which questions current logged-in user has liked
+    let userHasLikedMap = new Set();
+    if (req.user && req.user._id && baseQuestions && baseQuestions.length > 0) {
+      const questionIds = baseQuestions.map((q) => q._id);
+      const userVotes = await Vote.find({
+        userId: req.user._id,
+        targetType: 'question',
+        targetId: { $in: questionIds }
+      })
+        .select('targetId')
+        .lean();
 
-    const hasMore = questions.length === FEED_LIMIT;
-    const nextCursor = hasMore ? questions[questions.length - 1]._id : null;
+      userHasLikedMap = new Set(userVotes.map((v) => v.targetId.toString()));
+    }
 
-    const responsePayload = {
-      questions,
-      nextCursor,
-      hasMore
-    };
-
-    // Store in-memory cache for 15 seconds
-    feedCache.set(cacheKey, responsePayload, 15);
+    const questions = baseQuestions.map((q) => ({
+      ...q,
+      userHasLiked: userHasLikedMap.has(q._id.toString())
+    }));
 
     res.status(200).json({
       success: true,
-      cached: false,
-      ...responsePayload
+      cached: isCached,
+      questions,
+      nextCursor,
+      hasMore
     });
   } catch (error) {
     next(error);

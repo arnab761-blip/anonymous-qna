@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../api';
+import { useAuth } from '../context/AuthContext';
 import QuestionCard from '../components/QuestionCard';
-import { Plus, Filter, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Loader2, RefreshCw, BookOpen } from 'lucide-react';
 
 const SUBJECTS = [
   'সব বিষয়',
@@ -14,6 +16,7 @@ const SUBJECTS = [
 ];
 
 export default function FeedPage({ onOpenDetail, onNavigateAsk }) {
+  const { user } = useAuth();
   const [questions, setQuestions] = useState([]);
   const [subject, setSubject] = useState('');
   const [chapter, setChapter] = useState('');
@@ -58,7 +61,7 @@ export default function FeedPage({ onOpenDetail, onNavigateAsk }) {
 
   useEffect(() => {
     fetchFeed(true, null);
-  }, [subject, chapter]);
+  }, [subject, chapter, user]);
 
   const handleLoadMore = () => {
     if (cursor && !loadingMore) {
@@ -85,83 +88,115 @@ export default function FeedPage({ onOpenDetail, onNavigateAsk }) {
         <input
           type="text"
           placeholder="অধ্যায় (ঐচ্ছিক)"
-          className="filter-select"
-          style={{ flex: '0.8' }}
+          className="filter-select filter-chapter-input"
           value={chapter}
           onChange={(e) => setChapter(e.target.value)}
         />
 
-        <button
+        <motion.button
+          whileTap={{ scale: 0.92 }}
           onClick={() => fetchFeed(true, null)}
+          className="filter-refresh-btn"
           title="রিফ্রেশ করুন"
-          style={{
-            border: '1px solid #cbd5e1',
-            borderRadius: '6px',
-            backgroundColor: '#ffffff',
-            padding: '6px 10px',
-            cursor: 'pointer'
-          }}
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-        </button>
+        </motion.button>
       </div>
 
       {/* Error notification */}
       {error && (
-        <div style={{ margin: '16px', padding: '12px', backgroundColor: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '13px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            margin: '14px 16px',
+            padding: '12px 14px',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#b91c1c',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: '500'
+          }}
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {/* Questions Feed List */}
-      <div>
+      <div style={{ padding: '0 0' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 16px', color: '#64748b' }}>
-            <Loader2 className="animate-spin" size={28} style={{ margin: '0 auto 8px' }} />
-            <p style={{ fontSize: '14px' }}>প্রশ্নগুলো লোড হচ্ছে...</p>
+          <div style={{ textAlign: 'center', padding: '60px 16px', color: '#64748b' }}>
+            <Loader2 className="animate-spin" size={32} style={{ margin: '0 auto 10px', color: '#2563eb' }} />
+            <p style={{ fontSize: '14px', fontWeight: '500' }}>প্রশ্নগুলো লোড হচ্ছে...</p>
           </div>
         ) : questions.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-            <p style={{ fontSize: '16px', fontWeight: '600' }}>কোনো প্রশ্ন পাওয়া যায়নি</p>
-            <p style={{ fontSize: '13px', marginTop: '4px' }}>প্রথম প্রশ্নটি করার জন্য নিচের বাটনে চাপুন।</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="empty-feed-card"
+          >
+            <div className="empty-icon-circle">
+              <BookOpen size={30} color="#6366f1" />
+            </div>
+            <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '6px' }}>
+              কোনো প্রশ্ন পাওয়া যায়নি
+            </h4>
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', maxWidth: '300px', margin: '0 auto 16px' }}>
+              {subject || chapter
+                ? 'এই ফিল্টারে কোনো প্রশ্ন নেই। অন্য বিষয় নির্বাচন করুন।'
+                : 'প্রথম প্রশ্নটি করার মাধ্যমে আলোচনা শুরু করুন!'}
+            </p>
+            <button className="btn-primary" onClick={onNavigateAsk} style={{ margin: '0 auto' }}>
+              <Plus size={16} />
+              <span>প্রথম প্রশ্নটি করুন</span>
+            </button>
+          </motion.div>
         ) : (
-          questions.map((q) => (
-            <QuestionCard
-              key={q._id}
-              question={q}
-              onOpenDetail={onOpenDetail}
-            />
-          ))
+          <div className="questions-container">
+            {questions.map((q) => (
+              <QuestionCard
+                key={q._id}
+                question={q}
+                onOpenDetail={onOpenDetail}
+              />
+            ))}
+          </div>
         )}
       </div>
 
       {/* Cursor-based "আরও দেখুন" (Load More) Button */}
       {hasMore && !loading && (
         <div className="load-more-section">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             className="btn-secondary"
             onClick={handleLoadMore}
             disabled={loadingMore}
-            style={{ width: '100%', padding: '12px' }}
+            style={{ width: '100%', padding: '12px', borderRadius: '10px' }}
           >
             {loadingMore ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                আরও প্রশ্ন আসছে...
+                <span>আরও প্রশ্ন আসছে...</span>
               </>
             ) : (
               'আরও দেখুন (Load More)'
             )}
-          </button>
+          </motion.button>
         </div>
       )}
 
       {/* Floating Action Button (প্রশ্ন করুন) */}
-      <button className="fab-ask" onClick={onNavigateAsk}>
+      <motion.button
+        className="fab-ask"
+        onClick={onNavigateAsk}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
         <Plus size={20} />
         <span>প্রশ্ন করুন</span>
-      </button>
+      </motion.button>
     </div>
   );
 }

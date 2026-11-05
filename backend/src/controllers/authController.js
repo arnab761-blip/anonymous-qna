@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Question = require('../models/Question');
+const Answer = require('../models/Answer');
+const Vote = require('../models/Vote');
 
 /**
  * Generate a cryptographically random Student alias (e.g., Student-4821)
@@ -135,7 +138,99 @@ const login = async (req, res, next) => {
   }
 };
 
+// @desc    Get logged in student's dashboard stats, questions and answers
+// @route   GET /auth/dashboard
+const getStudentDashboard = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // 1. Fetch user profile
+    const userDoc = await User.findById(userId).select('name identifier alias role createdAt').lean();
+    if (!userDoc) {
+      return res.status(404).json({
+        success: false,
+        message: 'ব্যবহারকারী খুঁজে পাওয়া যায়নি।'
+      });
+    }
+
+    // 2. Fetch all questions asked by this student
+    const questions = await Question.find({ authorId: userId })
+      .select({
+        subject: 1,
+        chapter: 1,
+        text: 1,
+        imageUrl: 1,
+        alias: 1,
+        answerCount: 1,
+        likeCount: 1,
+        isVerifiedByTeacher: 1,
+        createdAt: 1
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Check which questions this user has liked
+    const questionIds = questions.map((q) => q._id);
+    let userLikedQuestions = new Set();
+    if (questionIds.length > 0) {
+      const userVotes = await Vote.find({
+        userId,
+        targetType: 'question',
+        targetId: { $in: questionIds }
+      })
+        .select('targetId')
+        .lean();
+      userLikedQuestions = new Set(userVotes.map((v) => v.targetId.toString()));
+    }
+
+    const questionsWithLike = questions.map((q) => ({
+      ...q,
+      userHasLiked: userLikedQuestions.has(q._id.toString())
+    }));
+
+    // 3. Fetch all answers posted by this student with parent question text
+    const answers = await Answer.find({ authorId: userId })
+      .populate('questionId', 'text subject chapter')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 4. Calculate aggregated stats
+    const totalQuestions = questions.length;
+    const totalAnswers = answers.length;
+    const verifiedQuestions = questions.filter((q) => q.isVerifiedByTeacher).length;
+
+    const questionsLikesReceived = questions.reduce((sum, q) => sum + (q.likeCount || 0), 0);
+    const answersLikesReceived = answers.reduce((sum, a) => sum + (a.likeCount || 0), 0);
+    const totalLikesReceived = questionsLikesReceived + answersLikesReceived;
+
+    const totalLikesGiven = await Vote.countDocuments({ userId, targetType: 'question' });
+
+    res.status(200).json({
+      success: true,
+      profile: {
+        name: userDoc.name,
+        identifier: userDoc.identifier,
+        alias: userDoc.alias,
+        role: userDoc.role,
+        joinedAt: userDoc.createdAt
+      },
+      stats: {
+        totalQuestions,
+        totalAnswers,
+        verifiedQuestions,
+        totalLikesReceived,
+        totalLikesGiven
+      },
+      questions: questionsWithLike,
+      answers
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
-  login
+  login,
+  getStudentDashboard
 };

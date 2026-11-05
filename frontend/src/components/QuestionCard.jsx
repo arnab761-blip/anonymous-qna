@@ -1,17 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { ThumbsUp, MessageCircle, User } from 'lucide-react';
 import TeacherVerifiedBadge from './TeacherVerifiedBadge';
 import FeedImage from './FeedImage';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 
+const getSubjectBadgeClass = (subject = '') => {
+  if (subject.includes('Physics') || subject.includes('পদার্থবিজ্ঞান')) return 'badge-physics';
+  if (subject.includes('Math') || subject.includes('গণিত')) return 'badge-math';
+  if (subject.includes('Chemistry') || subject.includes('রসায়ন')) return 'badge-chemistry';
+  if (subject.includes('Biology') || subject.includes('জীববিজ্ঞান')) return 'badge-biology';
+  if (subject.includes('ICT') || subject.includes('আইসিটি')) return 'badge-ict';
+  if (subject.includes('GK') || subject.includes('সাধারণ জ্ঞান')) return 'badge-gk';
+  return 'badge-default';
+};
+
 export default function QuestionCard({ question, onOpenDetail }) {
   const { user } = useAuth();
 
   // Optimistic UI state for Helpful / Like button
-  const [liked, setLiked] = useState(question.userHasLiked || false);
+  const [liked, setLiked] = useState(Boolean(question.userHasLiked));
   const [likeCount, setLikeCount] = useState(question.likeCount || 0);
   const [isLiking, setIsLiking] = useState(false);
+
+  useEffect(() => {
+    setLiked(Boolean(question.userHasLiked));
+    setLikeCount(question.likeCount || 0);
+  }, [question.userHasLiked, question.likeCount]);
 
   const handleToggleLike = async (e) => {
     e.stopPropagation();
@@ -32,6 +48,8 @@ export default function QuestionCard({ question, onOpenDetail }) {
 
     setLiked(nextLiked);
     setLikeCount(nextCount);
+    question.userHasLiked = nextLiked;
+    question.likeCount = nextCount;
     setIsLiking(true);
 
     // 2. Perform API request in background
@@ -40,11 +58,15 @@ export default function QuestionCard({ question, onOpenDetail }) {
       if (res.success) {
         setLiked(res.liked);
         setLikeCount(res.likeCount);
+        question.userHasLiked = res.liked;
+        question.likeCount = res.likeCount;
       }
     } catch (err) {
       // Revert if error occurs
       setLiked(prevLiked);
       setLikeCount(prevCount);
+      question.userHasLiked = prevLiked;
+      question.likeCount = prevCount;
       alert(err.message || 'লাইক আপডেট করতে ব্যর্থ হয়েছে।');
     } finally {
       setIsLiking(false);
@@ -56,12 +78,21 @@ export default function QuestionCard({ question, onOpenDetail }) {
     day: 'numeric'
   });
 
+  const badgeClass = getSubjectBadgeClass(question.subject);
+
   return (
-    <article className="question-card" onClick={() => onOpenDetail(question._id)}>
+    <motion.article
+      className="question-card"
+      onClick={() => onOpenDetail(question._id)}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+    >
       <div className="card-meta">
-        <div>
-          <span className="tag-subject">{question.subject}</span>
-          <span className="tag-chapter">{question.chapter}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <span className={`tag-subject ${badgeClass}`}>{question.subject}</span>
+          {question.chapter && (
+            <span className="tag-chapter">{question.chapter}</span>
+          )}
         </div>
         {question.isVerifiedByTeacher && <TeacherVerifiedBadge />}
       </div>
@@ -72,38 +103,30 @@ export default function QuestionCard({ question, onOpenDetail }) {
 
       <div className="question-footer">
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span className="alias-badge" style={{ fontSize: '11px', padding: '2px 8px' }}>
+          <span className="alias-badge">
             <User size={11} />
-            {question.alias}
+            <span>{question.alias}</span>
           </span>
           <span style={{ fontSize: '11px', color: '#94a3b8' }}>• {formattedDate}</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             className={`btn-helpful ${liked ? 'active' : ''}`}
             onClick={handleToggleLike}
-            title="Helpful (উপকারী)"
+            title={liked ? 'লাইক দেওয়া আছে (ক্লিক করে আনলাইক করুন)' : 'উপকারী (লাইক দিন)'}
           >
-            <ThumbsUp size={14} className={liked ? 'fill-blue-600 text-blue-600' : ''} />
+            <ThumbsUp size={14} className={liked ? 'active-thumb-icon' : ''} />
             <span>{likeCount}</span>
-          </button>
+          </motion.button>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#64748b',
-              fontSize: '13px',
-              fontWeight: '500'
-            }}
-          >
-            <MessageCircle size={15} />
+          <div className="answer-count-pill">
+            <MessageCircle size={14} />
             <span>{question.answerCount || 0}</span>
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }

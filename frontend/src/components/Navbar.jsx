@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, LogOut, LogIn, MessageSquarePlus } from 'lucide-react';
+import { User, LogOut, LogIn, LayoutDashboard, Shield } from 'lucide-react';
 
 export default function Navbar({ onNavigate, currentPage }) {
   const { user, logout } = useAuth();
@@ -8,50 +8,57 @@ export default function Navbar({ onNavigate, currentPage }) {
   return (
     <header className="app-header">
       <div
-        style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+        className="app-logo-box"
         onClick={() => onNavigate('feed')}
       >
-        <span style={{ fontSize: '18px', fontWeight: '700', color: '#1e3a8a' }}>
-          🎓 অ্যানোনিমাস Q&A
-        </span>
+        <div className="app-logo-icon">
+          <span>🎓</span>
+        </div>
+        <div>
+          <span className="app-logo-text">অ্যানোনিমাস Q&A</span>
+          <span className="app-logo-sub">শিক্ষার্থীদের মুক্ত ফোরাম</span>
+        </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {user ? (
           <>
+            {/* Student Dashboard Button */}
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className={`nav-action-btn ${currentPage === 'dashboard' ? 'active' : ''}`}
+              title="আমার ড্যাশবোর্ড"
+            >
+              <LayoutDashboard size={14} />
+              <span>ড্যাশবোর্ড</span>
+            </button>
+
+            {/* Admin Panel Button */}
             {user.role === 'admin' && (
               <button
                 onClick={() => onNavigate('admin')}
-                style={{
-                  backgroundColor: currentPage === 'admin' ? '#1e40af' : '#2563eb',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
+                className={`nav-action-btn admin-btn ${currentPage === 'admin' ? 'active' : ''}`}
+                title="অ্যাডমিন প্যানেল"
               >
-                প্যানেল
+                <Shield size={14} />
+                <span>প্যানেল</span>
               </button>
             )}
-            <span className="alias-badge" title="আপনার স্থায়ী গোপন পরিচয়">
+
+            {/* Clickable Student Alias Badge */}
+            <div
+              className={`alias-badge clickable ${currentPage === 'dashboard' ? 'active-alias' : ''}`}
+              title="আপনার গোপন ছদ্মনাম (ড্যাশবোর্ড দেখতে ক্লিক করুন)"
+              onClick={() => onNavigate('dashboard')}
+            >
               <User size={13} />
-              {user.alias}
-            </span>
+              <span>{user.alias}</span>
+            </div>
+
+            {/* Logout Button */}
             <button
               onClick={logout}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                color: '#64748b',
-                cursor: 'pointer',
-                padding: '4px'
-              }}
+              className="nav-icon-btn"
               title="লগআউট"
             >
               <LogOut size={16} />
@@ -59,12 +66,12 @@ export default function Navbar({ onNavigate, currentPage }) {
           </>
         ) : (
           <button
-            className="btn-secondary"
+            className="btn-primary"
             onClick={() => onNavigate('auth')}
-            style={{ padding: '4px 10px', fontSize: '12px' }}
+            style={{ padding: '6px 14px', fontSize: '13px', borderRadius: '8px' }}
           >
-            <LogIn size={13} />
-            লগইন
+            <LogIn size={14} />
+            <span>লগইন / যুক্ত হোন</span>
           </button>
         )}
       </div>

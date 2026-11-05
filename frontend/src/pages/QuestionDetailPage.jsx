@@ -55,7 +55,7 @@ export default function QuestionDetailPage({ questionId, onBack }) {
 
   useEffect(() => {
     fetchQuestionDetails();
-  }, [questionId]);
+  }, [questionId, user]);
 
   // Load more answers with cursor pagination
   const handleLoadMoreAnswers = async () => {
