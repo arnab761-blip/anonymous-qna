@@ -54,6 +54,15 @@ export const THEMES = [
     previewColor: '#2563eb',
     bgPreview: '#f8fafc',
     isDark: false
+  },
+  {
+    id: 'plain-white',
+    name: 'ক্লাসিক হোয়াইট (Classic White)',
+    tag: 'রেগুলার সাদা',
+    description: 'সাধারণ ও পরিচিত প্রথাগত সাদা ব্যাকগ্রাউন্ড ইন্টারফেস',
+    previewColor: '#64748b',
+    bgPreview: '#ffffff',
+    isDark: false
   }
 ];
 

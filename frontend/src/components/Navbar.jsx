@@ -19,20 +19,20 @@ export default function Navbar({ onNavigate, currentPage }) {
           <div className="app-logo-icon">
             <span>🎓</span>
           </div>
-          <div>
+          <div className="app-logo-text-group">
             <span className="app-logo-text">অ্যানোনিমাস Q&A</span>
             <span className="app-logo-sub">শিক্ষার্থীদের মুক্ত ফোরাম</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="nav-right-cluster">
           {/* Theme Palette Switcher Button */}
           <button
             className="theme-nav-btn"
             onClick={() => setIsThemeOpen(true)}
             title={`থিম পরিবর্তন করুন (বর্তমান: ${currentTheme.name})`}
           >
-            <Palette size={15} />
+            <Palette size={14} />
             <span className="theme-nav-btn-label">থিম</span>
           </button>
 
@@ -44,8 +44,8 @@ export default function Navbar({ onNavigate, currentPage }) {
                 className={`nav-action-btn ${currentPage === 'dashboard' ? 'active' : ''}`}
                 title="আমার ড্যাশবোর্ড"
               >
-                <LayoutDashboard size={14} />
-                <span>ড্যাশবোর্ড</span>
+                <LayoutDashboard size={13} />
+                <span className="nav-btn-text">ড্যাশবোর্ড</span>
               </button>
 
               {/* Admin Panel Button */}
@@ -55,8 +55,8 @@ export default function Navbar({ onNavigate, currentPage }) {
                   className={`nav-action-btn admin-btn ${currentPage === 'admin' ? 'active' : ''}`}
                   title="অ্যাডমিন প্যানেল"
                 >
-                  <Shield size={14} />
-                  <span>প্যানেল</span>
+                  <Shield size={13} />
+                  <span className="nav-btn-text">প্যানেল</span>
                 </button>
               )}
 
@@ -66,8 +66,8 @@ export default function Navbar({ onNavigate, currentPage }) {
                 title="আপনার গোপন ছদ্মনাম (ড্যাশবোর্ড দেখতে ক্লিক করুন)"
                 onClick={() => onNavigate('dashboard')}
               >
-                <User size={13} />
-                <span>{user.alias}</span>
+                <User size={12} />
+                <span className="alias-text">{user.alias}</span>
               </div>
 
               {/* Logout Button */}
@@ -76,16 +76,15 @@ export default function Navbar({ onNavigate, currentPage }) {
                 className="nav-icon-btn"
                 title="লগআউট"
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
               </button>
             </>
           ) : (
             <button
-              className="btn-primary"
+              className="btn-primary btn-login-nav"
               onClick={() => onNavigate('auth')}
-              style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px' }}
             >
-              <LogIn size={14} />
+              <LogIn size={13} />
               <span>লগইন</span>
             </button>
           )}
